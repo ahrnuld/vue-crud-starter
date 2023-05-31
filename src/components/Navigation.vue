@@ -23,8 +23,9 @@
         <ul class="navbar-nav">
           <div class="d-inline" v-if="isLoggedIn">
             <li class="nav-item d-inline">
-              <router-link to="/settings" class="nav-link d-inline" active-class="active">My Account ({{ this.username
-              }})</router-link>
+              <router-link to="/settings" class="nav-link d-inline" active-class="active">My Account ({{
+                this.user.firstname
+              }} {{ this.user.lastname }})</router-link>
             </li>
             <li class="nav-item d-inline">
               <a class="nav-link d-inline" @click="logout">Logout</a>
@@ -47,13 +48,15 @@
 <script>
 import { useUserSessionStore } from "../stores/usersession.js";
 import useEmitter from '../emitter.js';
+import axios from '../axios_auth';
 
 export default {
   name: "Navigation",
   data() {
     return {
       isLoggedIn: false,
-      username: ""
+      user_id: "",
+      user: {}
     };
   },
   methods: {
@@ -61,6 +64,12 @@ export default {
       useUserSessionStore().logout();
       this.$router.push("/login");
       this.isLoggedIn = false;
+    },
+    loadUser() {
+      // getuser is a promise
+      useUserSessionStore().getUser().then(user => {
+        this.user = user;
+      });
     }
   },
   events: {
@@ -71,11 +80,13 @@ export default {
   mounted() {
     useUserSessionStore().localLogin();
     this.isLoggedIn = useUserSessionStore().isAuthenticated;
-    this.username = useUserSessionStore().getUsername;
+    if (this.isLoggedIn) {
+      this.loadUser();
+    }
 
-    useEmitter().on("login", username => {
+    useEmitter().on("login", user_id => {
       this.isLoggedIn = true;
-      this.username = username;
+      this.user_id = user_id;
     });
   }
 };

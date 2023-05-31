@@ -6,22 +6,23 @@ export const useUserSessionStore = defineStore('usersession', {
     state: () => ({
         access_token: '',
         refresh_token: '',
-        username: '',
-        expiresAt: 0
+        user_id: 0,
+        expiresAt: 0,
+        user: {}
     }),
     getters: {
         isAuthenticated: (state) => state.access_token !== '',
-        getUsername: (state) => state.username
+        getUserId: (state) => state.user_id,
     },
     actions: {
         localLogin() {
-            if (!localStorage['access_token'] || !localStorage['refresh_token'] || !localStorage['expiresAt'].length || !localStorage['username'].length) {
+            if (!localStorage['access_token'] || !localStorage['refresh_token'] || !localStorage['expiresAt'].length || !localStorage['id'].length) {
                 return;
             }
 
             this.access_token = localStorage['access_token'];
             this.refresh_token = localStorage['refresh_token'];
-            this.username = localStorage['username'];
+            this.user_id = localStorage['id'];
             this.expiresAt = localStorage['expiresAt'];
 
             if (Date.now() > this.expiresAt) {
@@ -29,7 +30,7 @@ export const useUserSessionStore = defineStore('usersession', {
                 this.refresh()
             }
 
-            axios.defaults.headers.common['Authorization'] = 'Bearer ' + this.token;
+            axios.defaults.headers.common['Authorization'] = 'Bearer ' + this.access_token;
         },
         login(username, password) {
             return new Promise((resolve, reject) => {
@@ -41,22 +42,22 @@ export const useUserSessionStore = defineStore('usersession', {
                     .then((response) => {
                         this.access_token = response.data.access_token;
                         this.refresh_token = response.data.refresh_token;
-                        this.username = response.data.username;
+                        this.user_id = response.data.id;
                         this.expiresAt = response.data.expiresAt;
 
-                        axios.defaults.headers.common['Authorization'] = 'Bearer ' + this.token;
+                        axios.defaults.headers.common['Authorization'] = 'Bearer ' + this.access_token;
                         localStorage['access_token'] = this.access_token;
                         localStorage['refresh_token'] = this.refresh_token;
-                        localStorage['username'] = response.data.username;
+                        localStorage['id'] = response.data.id;
                         localStorage['expiresAt'] = response.data.expiresAt;
 
-                        useEmitter().emit('login', response.data.username);
-
+                        useEmitter().emit('login', this.user_id);
                         resolve();
                     })
                     .catch((error) => {
                         console.log(error);
                         console.log(error.response.data.error_message);
+                        reject(error.response.data.error_message);
                     });
             });
         },
@@ -78,7 +79,7 @@ export const useUserSessionStore = defineStore('usersession', {
                         this.refresh_token = response.data.refresh_token;
                         this.expiresAt = response.data.expiresAt;
 
-                        axios.defaults.headers.common['Authorization'] = 'Bearer ' + this.token;
+                        axios.defaults.headers.common['Authorization'] = 'Bearer ' + this.access_token;
                         localStorage['access_token'] = this.access_token;
                         localStorage['refresh_token'] = this.refresh_token;
                         localStorage['expiresAt'] = this.expiresAt;
@@ -91,6 +92,23 @@ export const useUserSessionStore = defineStore('usersession', {
                         reject(error.response.data.errorMessage);
                     }
                     );
+            });
+        },
+        getUser() {
+            return new Promise((resolve, reject) => {
+                if (this.user != {}) {
+                    resolve(this.user);
+                }
+
+                axios
+                    .get("/users/" + this.user_id)
+                    .then((response) => {
+                        this.user = response.data;
+                        resolve(response.data);
+                    })
+                    .catch((error) => {
+                        reject(error.response.data.errorMessage);
+                    });
             });
         }
     }
