@@ -7,10 +7,22 @@
 </template>
 
 <script>
+import { useUserSessionStore } from "../stores/usersession.js";
+
 export default {
   name: "Home",
+  data() {
+    return {
+      username: "",
+      password: "",
+    };
+  },
+  mounted() {
+    if (!useUserSessionStore().isAuthenticated) {
+      this.$router.push("/login");
+    }
+  },
 };
 </script>
 
-<style>
-</style>
+<style></style>

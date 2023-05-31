@@ -1,18 +1,21 @@
 <script>
+import { useUserSessionStore } from './stores/usersession'
 import Navigation from './components/Navigation.vue'
 
 export default {
   name: "App",
   components: {
     Navigation
-  }
+  },
+  mounted() {
+    useUserSessionStore().localLogin();
+  },
 };
 </script>
 
 <template>
-   <navigation />
-   <RouterView />
+  <navigation />
+  <RouterView />
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>
