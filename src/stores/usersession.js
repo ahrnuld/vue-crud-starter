@@ -8,7 +8,7 @@ export const useUserSessionStore = defineStore('usersession', {
         refresh_token: '',
         user_id: 0,
         expiresAt: 0,
-        user: {}
+        user: null
     }),
     getters: {
         isAuthenticated: (state) => state.access_token !== '',
@@ -26,8 +26,9 @@ export const useUserSessionStore = defineStore('usersession', {
             this.expiresAt = localStorage['expiresAt'];
 
             if (Date.now() > this.expiresAt) {
-                // Try to refresh.
-                this.refresh()
+                console.log('Token expired at. Trying to refresh.');
+                this.refresh();
+                return;
             }
 
             axios.defaults.headers.common['Authorization'] = 'Bearer ' + this.access_token;
@@ -84,6 +85,8 @@ export const useUserSessionStore = defineStore('usersession', {
                         localStorage['refresh_token'] = this.refresh_token;
                         localStorage['expiresAt'] = this.expiresAt;
 
+                        console.log('Refreshed token.');
+
                         resolve();
                     }
                     )
@@ -95,8 +98,13 @@ export const useUserSessionStore = defineStore('usersession', {
             });
         },
         getUser() {
+            if (Date.now() > this.expiresAt) {
+                console.log('Token expired at. Trying to refresh.');
+                this.refresh()
+            }
+
             return new Promise((resolve, reject) => {
-                if (this.user != {}) {
+                if (this.user != null) {
                     resolve(this.user);
                 }
 

@@ -48,14 +48,12 @@
 <script>
 import { useUserSessionStore } from "../stores/usersession.js";
 import useEmitter from '../emitter.js';
-import axios from '../axios_auth';
 
 export default {
   name: "Navigation",
   data() {
     return {
       isLoggedIn: false,
-      user_id: "",
       user: {}
     };
   },
@@ -86,7 +84,7 @@ export default {
 
     useEmitter().on("login", user_id => {
       this.isLoggedIn = true;
-      this.user_id = user_id;
+      this.loadUser();
     });
   }
 };

@@ -1,6 +1,7 @@
 <template>
     <section>
         <div class="col-12 mx-auto">
+            <h1 class="mx-auto text-center">InHolland Bank</h1>
             <form class="mx-auto w-100 p-2">
                 <div class="form-group mx-auto col-6 col-mx-12">
                     <label for="username">Username</label>

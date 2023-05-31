@@ -18,10 +18,6 @@ const routes = [
   { path: '/login', component: Login },
   { path: '/register', component: Register }
   //{ path: '/transferlist', component: TransferHistoryList },
-
-  /*{ path: '/products', component: ProductList },
-  { path: '/createproduct', component: CreateProduct },
-  { path: '/editproduct/:id', component: EditProduct, props: true  }*/
 ];
 
 const router = createRouter({
