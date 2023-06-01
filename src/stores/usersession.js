@@ -7,7 +7,7 @@ export const useUserSessionStore = defineStore('usersession', {
         access_token: '',
         refresh_token: '',
         user_id: 0,
-        expiresAt: 0,
+        expires_at: 0,
         user: null
     }),
     getters: {
@@ -16,16 +16,16 @@ export const useUserSessionStore = defineStore('usersession', {
     },
     actions: {
         localLogin() {
-            if (!localStorage['access_token'] || !localStorage['refresh_token'] || !localStorage['expiresAt'].length || !localStorage['id'].length) {
+            if (!localStorage['access_token'] || !localStorage['refresh_token'] || !localStorage['expires_at'].length || !localStorage['id'].length) {
                 return;
             }
 
             this.access_token = localStorage['access_token'];
             this.refresh_token = localStorage['refresh_token'];
             this.user_id = localStorage['id'];
-            this.expiresAt = localStorage['expiresAt'];
+            this.expires_at = localStorage['expires_at'];
 
-            if (Date.now() > this.expiresAt) {
+            if (Date.now() > this.expires_at) {
                 console.log('Token expired at. Trying to refresh.');
                 this.refresh();
                 return;
@@ -44,13 +44,13 @@ export const useUserSessionStore = defineStore('usersession', {
                         this.access_token = response.data.access_token;
                         this.refresh_token = response.data.refresh_token;
                         this.user_id = response.data.id;
-                        this.expiresAt = response.data.expiresAt;
+                        this.expires_at = response.data.expires_at;
 
                         axios.defaults.headers.common['Authorization'] = 'Bearer ' + this.access_token;
                         localStorage['access_token'] = this.access_token;
                         localStorage['refresh_token'] = this.refresh_token;
                         localStorage['id'] = response.data.id;
-                        localStorage['expiresAt'] = response.data.expiresAt;
+                        localStorage['expires_at'] = response.data.expires_at;
 
                         useEmitter().emit('login', this.user_id);
                         resolve();
@@ -78,12 +78,12 @@ export const useUserSessionStore = defineStore('usersession', {
                     .then((response) => {
                         this.access_token = response.data.access_token;
                         this.refresh_token = response.data.refresh_token;
-                        this.expiresAt = response.data.expiresAt;
+                        this.expires_at = response.data.expires_at;
 
                         axios.defaults.headers.common['Authorization'] = 'Bearer ' + this.access_token;
                         localStorage['access_token'] = this.access_token;
                         localStorage['refresh_token'] = this.refresh_token;
-                        localStorage['expiresAt'] = this.expiresAt;
+                        localStorage['expires_at'] = this.expires_at;
 
                         console.log('Refreshed token.');
 
@@ -98,7 +98,7 @@ export const useUserSessionStore = defineStore('usersession', {
             });
         },
         getUser() {
-            if (Date.now() > this.expiresAt) {
+            if (Date.now() > this.expires_at) {
                 console.log('Token expired at. Trying to refresh.');
                 this.refresh()
             }
